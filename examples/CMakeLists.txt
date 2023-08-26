@@ -1,0 +1,5 @@
+add_executable(ezserial_read read.cpp)
+target_link_libraries(ezserial_read PRIVATE ezserial)
+
+target_compile_features(ezserial_read PRIVATE cxx_std_23)
+set_target_properties(ezserial_read PROPERTIES CXX_EXTENSIONS OFF)
