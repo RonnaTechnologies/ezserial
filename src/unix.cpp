@@ -82,6 +82,15 @@ public:
         }
     }
 
+    std::string Read()
+    {
+        char smallBuff[256] = {0};
+        
+        ::read(handle, &smallBuff, sizeof(smallBuff));
+
+        return std::string{&smallBuff[0]};
+    }
+
     void SetBaudRate(std::size_t baudRate) noexcept
     {
         this->baudRate = baudRate;
@@ -154,6 +163,10 @@ void SerialPort::Close() noexcept
     impl->Close();
 }
 
+std::string SerialPort::Read()
+{
+    return impl->Read();
+}
 
 void SerialPort::SetBaudRate(std::size_t baudRate) noexcept
 {
