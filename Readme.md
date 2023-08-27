@@ -1,4 +1,4 @@
-# EZ Serial C++ library
+# EZ Serial: serial port C++ library
 
 A cross-platform serial port library written in modern C++.
 
