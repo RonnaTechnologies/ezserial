@@ -177,4 +177,3 @@ bool SerialPort::IsOpen() const noexcept
 {
     return impl->IsOpen();
 }
-
