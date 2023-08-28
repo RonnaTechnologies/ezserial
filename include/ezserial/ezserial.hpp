@@ -14,6 +14,7 @@ public:
     void Open() noexcept;
     void Close() noexcept;
 
+    void Write(std::string_view data);
     std::string Read();
 
     void SetBaudRate(std::size_t baudRate) noexcept;
