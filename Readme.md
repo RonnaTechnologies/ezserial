@@ -16,6 +16,8 @@ This is a basic and easy-to-use library, the intent is to provide a simple and m
 
 ## Building the project
 
+## Documentation
+
 ## Running the tests
 
 ## Contributing
