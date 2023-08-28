@@ -70,6 +70,8 @@ public:
         {
             return;
         }
+
+        isOpen = true;
     }
 
     void Close() noexcept
