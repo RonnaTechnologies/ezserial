@@ -29,7 +29,7 @@ public:
 
     void Open() noexcept
     {
-        handle = ::open(portName.c_str(), O_RDWR);
+        handle = ::open(portName.c_str(), O_RDWR | O_NOCTTY);
         termios tty;
 
 
@@ -50,15 +50,15 @@ public:
         cfsetospeed(&tty, rate);
         cfsetispeed(&tty, rate);
 
-        tty.c_cflag &= ~PARENB;            // Make 8n1
-        tty.c_cflag &= ~CSTOPB;
-        tty.c_cflag &= ~CSIZE;
-        tty.c_cflag |= CS8;
+        tty.c_cflag &= ~PARENB;         // Make 8n1 (Disable parity)
+        tty.c_cflag &= ~CSTOPB;         // Use a single stop bit
+        tty.c_cflag &= ~CSIZE;          // Clear all the size bits
+        tty.c_cflag |= CS8;             // 8 bits per byte
 
-        tty.c_cflag &=  ~CRTSCTS;           // no flow control
-        tty.c_cc[VMIN] = 0;                 // read blocks
-        tty.c_cc[VTIME] = 10;               // 1 second read timeout
-        tty.c_cflag |= CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
+        tty.c_cflag &=  ~CRTSCTS;       // Disable flow control
+        tty.c_cc[VMIN] = 0;             // Read blocks
+        tty.c_cc[VTIME] = 10;           // 1 second read timeout
+        tty.c_cflag |= CREAD | CLOCAL;  // Turn on READ & ignore ctrl lines
 
         // Raw mode
         cfmakeraw(&tty);
@@ -92,9 +92,8 @@ public:
     std::string Read()
     {
         char smallBuff[256] = {0};
-        
         ::read(handle, &smallBuff, sizeof(smallBuff));
-
+        
         return std::string{&smallBuff[0]};
     }
 
