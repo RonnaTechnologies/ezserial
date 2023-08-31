@@ -93,6 +93,12 @@ public:
 
     }
 
+    void Write(std::string_view data)
+    {
+        DWORD dwBytesWritten = 0;
+        WriteFile(hcom, data.data(), data.size(), &dwBytesWritten, NULL);
+    }
+
     std::string Read()
     {
         constexpr auto BUFFERLENGTH = 4095;
@@ -132,6 +138,11 @@ void SerialPort::Open() noexcept
 void SerialPort::Close() noexcept
 {
     impl->Close();
+}
+
+void SerialPort::Write(std::string_view data)
+{
+    impl->Write(data);
 }
 
 std::string SerialPort::Read()
