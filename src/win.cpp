@@ -96,7 +96,7 @@ public:
     void Write(std::string_view data)
     {
         DWORD dwBytesWritten = 0;
-        WriteFile(hcom, data.data(), data.size(), &dwBytesWritten, NULL);
+        WriteFile(hCom, data.data(), data.size(), &dwBytesWritten, NULL);
     }
 
     std::string Read()
