@@ -57,7 +57,7 @@ public:
 
         tty.c_cflag &=  ~CRTSCTS;       // Disable flow control
         tty.c_cc[VMIN] = 0;             // Read blocks
-        tty.c_cc[VTIME] = 10;           // 1 second read timeout
+        tty.c_cc[VTIME] = 1;           // 1 second read timeout
         tty.c_cflag |= CREAD | CLOCAL;  // Turn on READ & ignore ctrl lines
 
         // Raw mode
