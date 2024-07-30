@@ -78,6 +78,11 @@ public:
         {
             ::close(handle);
             isOpen = false;
+            if (epoll_handle != -1)
+            {
+                ::close(epoll_handle);
+                epoll_handle = -1;
+            }
             handle = -1;
         }
     }
