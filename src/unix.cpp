@@ -1,4 +1,3 @@
-#include <array>
 #include <ezserial/ezserial.hpp>
 
 #include <array>
@@ -22,14 +21,12 @@ public:
     {
     }
 
-    ~SerialPortImpl()
-    {
-    }
+    ~SerialPortImpl() = default;
 
     void Open() noexcept
     {
         handle = ::open(portName.c_str(), O_RDWR | O_NOCTTY);
-        termios tty;
+        termios tty{};
 
         if (tcgetattr(handle, &tty) != 0)
         {
@@ -110,12 +107,13 @@ public:
         ::write(handle, data.data(), data.size());
     }
 
-    std::string Read()
+    std::string Read() const
     {
-        char smallBuff[256] = { 0 };
-        ::read(handle, &smallBuff, sizeof(smallBuff));
+        static constexpr auto smallBuffSize = 256U;
+        std::array<char, smallBuffSize> smallBuff{ 0 };
+        ::read(handle, smallBuff.data(), smallBuff.size());
 
-        return std::string{ &smallBuff[0] };
+        return std::string{ smallBuff.data() };
     }
 
     void SetBaudRate(std::size_t baudRate) noexcept
@@ -131,7 +129,7 @@ public:
 private:
     std::string portName;
     bool isOpen{ false };
-    std::size_t baudRate;
+    std::size_t baudRate{};
     int handle{};
     int epoll_handle{ -1 };
 
@@ -198,7 +196,7 @@ void SerialPort::Write(std::string_view data)
     impl->Write(data);
 }
 
-std::string SerialPort::Read()
+std::string SerialPort::Read() const
 {
     return impl->Read();
 }

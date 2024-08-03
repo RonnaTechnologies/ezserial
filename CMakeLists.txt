@@ -3,6 +3,9 @@ project(EZSerial VERSION 0.1.0 DESCRIPTION "Serial port C++ library" LANGUAGES C
 
 include(CTest)
 
+
+set(CMAKE_CXX_FLAGS "--coverage -fprofile-instr-generate -fcoverage-mapping")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)

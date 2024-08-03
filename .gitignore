@@ -1,2 +1,6 @@
 build/*
 .vscode
+.cache
+coverage
+compile_commands.json
+*.profraw

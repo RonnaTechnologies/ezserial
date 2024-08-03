@@ -12,17 +12,22 @@ public:
     explicit SerialPort(std::string_view portName);
     virtual ~SerialPort();
 
+    SerialPort(const SerialPort&) = delete;
+    SerialPort(SerialPort&&) = delete;
+    auto operator=(const SerialPort&) = delete;
+    auto operator=(SerialPort&&) = delete;
+
     void Open() noexcept;
     void Close() noexcept;
 
     bool Poll(const std::optional<std::chrono::milliseconds>& timeout) noexcept;
 
     void Write(std::string_view data);
-    std::string Read();
+    std::string Read() const;
 
     void SetBaudRate(std::size_t baudRate) noexcept;
 
-    bool IsOpen() const noexcept;
+    [[nodiscard]] bool IsOpen() const noexcept;
 
 
 private:
