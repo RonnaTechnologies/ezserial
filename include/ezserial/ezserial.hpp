@@ -10,6 +10,7 @@ class SerialPort
 {
 public:
     explicit SerialPort(std::string_view portName);
+    explicit SerialPort(int nativeHandle);
     virtual ~SerialPort();
 
     SerialPort(const SerialPort&) = delete;
