@@ -24,7 +24,7 @@ public:
     bool Poll(const std::optional<std::chrono::milliseconds>& timeout) noexcept;
 
     void Write(std::string_view data);
-    std::string Read() const;
+    std::string Read();
 
     void SetBaudRate(std::size_t baudRate) noexcept;
 
