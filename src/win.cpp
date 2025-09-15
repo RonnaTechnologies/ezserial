@@ -9,7 +9,7 @@
 class SerialPort::SerialPortImpl
 {
 public:
-    explicit SerialPortImpl(std::string_view port) : portName{ "\\\\.\\" + std::string{ port } }
+    explicit SerialPortImpl(std::string_view port) : portName{ R"(\\.\)" + std::string{ port } }
     {
     }
 
@@ -51,12 +51,25 @@ public:
             return;
         }
 
-        serialParams.BaudRate = 9600;
+        serialParams.fBinary = TRUE;
+        serialParams.fDtrControl = DTR_CONTROL_ENABLE;
+        serialParams.fDsrSensitivity = FALSE;
+        serialParams.fTXContinueOnXoff = FALSE;
+        serialParams.fOutX = FALSE;
+        serialParams.fInX = FALSE;
+        serialParams.fErrorChar = FALSE;
+        serialParams.fNull = FALSE;
+        serialParams.fRtsControl = RTS_CONTROL_ENABLE;
+        serialParams.fAbortOnError = FALSE;
+        serialParams.fOutxCtsFlow = FALSE;
+        serialParams.fOutxDsrFlow = FALSE;
+        serialParams.DCBlength = sizeof(serialParams);
+        serialParams.BaudRate = 115200;
         serialParams.ByteSize = 8;
         serialParams.StopBits = ONESTOPBIT;
         serialParams.Parity = NOPARITY;
         serialParams.fBinary = TRUE;
-        serialParams.fDtrControl = DTR_CONTROL_ENABLE;
+        // serialParams.fDtrControl = DTR_CONTROL_ENABLE;
         serialParams.fRtsControl = RTS_CONTROL_ENABLE;
 
         if (!SetCommState(hCom, &serialParams))
@@ -68,9 +81,9 @@ public:
 
         // Set timeouts for non-blocking behavior
         COMMTIMEOUTS timeout = { 0 };
-        timeout.ReadIntervalTimeout = MAXDWORD;   // No interval timeout
-        timeout.ReadTotalTimeoutConstant = 100;   // Return after 100ms if no data
-        timeout.ReadTotalTimeoutMultiplier = 0;   // No multiplier
+        timeout.ReadIntervalTimeout = 50;         // No interval timeout
+        timeout.ReadTotalTimeoutConstant = 50;    // Return after 100ms if no data
+        timeout.ReadTotalTimeoutMultiplier = 10;  // No multiplier
         timeout.WriteTotalTimeoutConstant = 50;   // Write timeout
         timeout.WriteTotalTimeoutMultiplier = 10; // Write multiplier
 
