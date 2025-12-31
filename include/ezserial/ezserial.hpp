@@ -1,14 +1,25 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 class SerialPort
 {
 public:
+    struct PortInfo
+    {
+        std::string port_name;
+        std::uint16_t vid{};
+        std::uint16_t pid{};
+    };
+
+    static auto ListPorts() -> std::vector<PortInfo>;
+
     explicit SerialPort(std::string_view portName);
     virtual ~SerialPort();
 

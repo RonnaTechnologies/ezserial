@@ -1,17 +1,23 @@
+
 #include <ezserial/ezserial.hpp>
 
+#include <fcntl.h> // File control definitions
+#include <fstream>
+#include <sys/epoll.h>
+#include <termios.h> // POSIX terminal control definitions
+#include <unistd.h>  // UNIX standard function definitions
+
+#include <algorithm>
 #include <array>
 #include <cstdio> // Standard input / output functions
 #include <cstdlib>
 #include <cstring> // String function definitions
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
-#include <cerrno>  // Error number definitions
-#include <fcntl.h> // File control definitions
-#include <sys/epoll.h>
-#include <termios.h> // POSIX terminal control definitions
-#include <unistd.h>  // UNIX standard function definitions
 
 class SerialPort::SerialPortImpl
 {
@@ -168,13 +174,87 @@ private:
     };
 };
 
+auto SerialPort::ListPorts() -> std::vector<SerialPort::PortInfo>
+{
+    std::vector<SerialPort::PortInfo> ports;
+
+    const auto tty_path = std::filesystem::path{ "/sys/class/tty" };
+
+    static constexpr auto allowed_devices =
+    std::array{ "ttyS", "ttyUSB", "ttyXRUSB", "ttyACM", "ttyAMA", "rfcomm", "ttyAP", "ttyGS" };
+
+    std::vector<std::string> ports_names;
+    for (const auto& entry : std::filesystem::directory_iterator{ tty_path })
+    {
+        const auto port_name = entry.path().filename().generic_string();
+        if (entry.is_directory() &&
+            std::ranges::any_of(allowed_devices,
+                                [&](const char* name) { return port_name.find(name) != std::string::npos; }))
+        {
+
+            ports_names.push_back(port_name);
+        }
+    }
+
+    for (const auto& port_name : ports_names)
+    {
+        if (!std::filesystem::exists(tty_path / port_name / "device"))
+        {
+            continue;
+        }
+
+        const auto device_path = std::filesystem::canonical(tty_path / port_name / "device");
+        const auto subsystem = std::filesystem::canonical(device_path / "subsystem").filename();
+        const auto usb_interface_path = [](const std::string& subsystem,
+                                           const std::filesystem::path& device_path) -> std::optional<std::filesystem::path>
+        {
+            if (subsystem == "usb")
+            {
+                return device_path;
+            }
+            if (subsystem == "usb-serial")
+            {
+                return device_path.parent_path();
+            }
+
+            return std::nullopt;
+        }(subsystem, device_path);
+
+        if (usb_interface_path.has_value())
+        {
+            const auto usb_device_path = usb_interface_path->parent_path();
+            const auto read_file_content = [](const std::filesystem::path& file_path)
+            {
+                auto file = std::ifstream{ file_path };
+                std::string content;
+                file >> content;
+                return content;
+            };
+
+            try
+            {
+                const auto vid = read_file_content(usb_device_path / "idVendor");
+                const auto pid = read_file_content(usb_device_path / "idProduct");
+                const auto port_info = SerialPort::PortInfo{ .port_name = "/dev/" + port_name,
+                                                             .vid = static_cast<std::uint16_t>(std::stoi(vid)),
+                                                             .pid = static_cast<std::uint16_t>(std::stoi(pid)) };
+                ports.emplace_back(port_info);
+            }
+            catch (...)
+            {
+                continue;
+            }
+        }
+    }
+    return ports;
+}
+
+
 SerialPort::SerialPort(std::string_view portName) : impl{ std::make_unique<SerialPortImpl>(portName) }
 {
 }
 
-SerialPort::~SerialPort()
-{
-}
+SerialPort::~SerialPort() = default;
 
 void SerialPort::Open() noexcept
 {
